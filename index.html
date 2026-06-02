@@ -1,0 +1,559 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soal Pilihan Ganda — Bahasa Arab</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f5f2;
+    color: #1a1a1a;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+  .wrapper { max-width: 760px; margin: 0 auto; }
+
+  .header {
+    background: #fff;
+    border: 1px solid #e5e5e0;
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .header h1 { font-size: 18px; font-weight: 600; color: #111; }
+  .header p { font-size: 13px; color: #777; margin-top: 4px; }
+  .progress-bar {
+    height: 4px;
+    background: #eee;
+    border-radius: 99px;
+    margin-top: 14px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #3b82f6;
+    border-radius: 99px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn {
+    font-size: 13px;
+    padding: 7px 16px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #444;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    font-family: inherit;
+  }
+  .btn:hover { background: #f5f5f2; }
+  .btn.active { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; font-weight: 500; }
+  .score-badge {
+    margin-left: auto;
+    font-size: 13px;
+    padding: 7px 16px;
+    border-radius: 8px;
+    background: #fff;
+    color: #666;
+    border: 1px solid #e5e5e0;
+  }
+  .score-badge span { font-weight: 600; color: #111; }
+
+  .question-card {
+    background: #fff;
+    border: 1px solid #e5e5e0;
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .question-card.answered { border-color: #c7d2fe; }
+  .question-card.correct { border-color: #86efac; background: #f0fdf4; }
+  .question-card.wrong { border-color: #fca5a5; background: #fef2f2; }
+
+  .q-header {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+  .q-num {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .q-num.correct-num { background: #dcfce7; color: #16a34a; }
+  .q-num.wrong-num { background: #fee2e2; color: #dc2626; }
+  .q-text { font-size: 14px; line-height: 1.65; color: #1a1a1a; }
+  .q-text .arabic {
+    display: block;
+    background: #f8f8f6;
+    border: 1px solid #e5e5e0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 22px;
+    line-height: 1.9;
+    margin: 8px 0;
+    color: #1a1a1a;
+    text-align: right;
+    direction: rtl;
+    font-family: 'Arabic Typesetting', 'Traditional Arabic', 'Amiri', serif;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-left: 40px;
+  }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #e5e5e0;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #1a1a1a;
+    background: #fafafa;
+    transition: background 0.15s, border-color 0.15s;
+    text-align: left;
+    width: 100%;
+    font-family: inherit;
+  }
+  .option:hover:not(:disabled) { background: #f0f0f0; border-color: #ccc; }
+  .option.selected { background: #eff6ff; border-color: #93c5fd; color: #1d4ed8; }
+  .option.correct-ans { background: #f0fdf4; border-color: #86efac; color: #15803d; }
+  .option.wrong-ans { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
+  .option:disabled { cursor: default; }
+  .option-label {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 1px;
+    opacity: 0.6;
+  }
+  .option-text {
+    flex: 1;
+  }
+  .option-text .arabic-opt {
+    font-family: 'Arabic Typesetting', 'Traditional Arabic', 'Amiri', serif;
+    font-size: 22px;
+    direction: rtl;
+    text-align: right;
+    display: block;
+    line-height: 1.7;
+  }
+
+  .q-result {
+    margin-left: 40px;
+    margin-top: 10px;
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    display: none;
+  }
+  .q-result.show { display: block; }
+  .q-result.success { color: #15803d; background: #dcfce7; }
+  .q-result.danger { color: #dc2626; background: #fee2e2; }
+
+  .submit-area {
+    background: #fff;
+    border: 1px solid #e5e5e0;
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .summary { font-size: 13px; color: #777; }
+  .btn-submit {
+    font-size: 14px;
+    padding: 9px 28px;
+    border-radius: 10px;
+    border: none;
+    background: #1a1a1a;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 500;
+    transition: opacity 0.15s;
+    font-family: inherit;
+  }
+  .btn-submit:hover:not(:disabled) { opacity: 0.82; }
+  .btn-submit:disabled { opacity: 0.35; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="header">
+    <h1>Soal Pilihan Ganda — Bahasa Arab</h1>
+    <p>Fi'il, Fa'il, Maf'ul bih &amp; Dhomir &nbsp;·&nbsp; Pilih satu jawaban yang paling tepat untuk setiap soal</p>
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn active" onclick="filterQuestions('all')">Semua soal</button>
+    <button class="btn" onclick="filterQuestions('unanswered')">Belum dijawab</button>
+    <button class="btn" onclick="filterQuestions('answered')">Sudah dijawab</button>
+    <div class="score-badge">Terjawab: <span id="answered-count">0</span> / <span id="total-count">25</span></div>
+  </div>
+
+  <div id="questions-container"></div>
+
+  <div class="submit-area">
+    <div class="summary" id="summary-text">Jawab semua soal untuk melihat nilai akhir</div>
+    <button class="btn-submit" id="submit-btn" onclick="submitAll()" disabled>Kumpulkan Jawaban</button>
+  </div>
+
+</div>
+
+<script>
+// Helper: wrap Arabic text
+function ar(text) {
+  return `<span class="arabic-opt">${text}</span>`;
+}
+
+const questions = [
+  {
+    q: 'Perhatikan kalimat berikut!',
+    arabic: 'الطُلَّابُ يَتَعَلَّمُوْنَ فِي الفَصْلِ بِالْـجِدِّ',
+    qsuffix: 'فَاعِلٌ untuk kalimat di atas adalah…',
+    options: ['الطُلَّابُ', 'يَتَعَلَّمُوْنَ', 'فِي', 'الفَصْلِ', 'بِالْـجِدِّ'],
+    optionType: 'arabic',
+    answer: 0
+  },
+  {
+    q: 'Perhatikan kalimat berikut!',
+    arabic: 'صَلُّوْا المُسْلِمُوْنَ الجُمْعَةَ فِي المَسْجِدِ',
+    qsuffix: 'مَفْعُوْلٌ بِهِ pada kalimat di atas adalah…',
+    options: ['صَلُّوْا', 'المُسْلِمُوْنَ', 'الجُمْعَةَ', 'فِي', 'المَسْجِدِ'],
+    optionType: 'arabic',
+    answer: 2
+  },
+  {
+    q: 'Perhatikan kalimat berikut!',
+    arabic: 'صَلُّوْا المُسْلِمُوْنَ الجُمْعَةَ فِي المَسْجِدِ',
+    qsuffix: 'فِعْلٌ pada kalimat di atas adalah…',
+    options: ['المَسْجِدِ', 'فِي', 'الجُمْعَةَ', 'المُسْلِمُوْنَ', 'صَلُّوْا'],
+    optionType: 'arabic',
+    answer: 4
+  },
+  {
+    q: 'Perhatikan kalimat berikut!',
+    arabic: 'رَجَعَتَا الطَالِبَتَانِ مِنَ المَسْجِدِ بالدَرَّاجَةِ',
+    qsuffix: 'فَاعِلٌ pada kalimat di atas adalah…',
+    options: ['رَجَعَتَا', 'الطَالِبَتَانِ', 'مِنَ', 'المَسْجِدِ', 'بالدَرَّاجَةِ'],
+    optionType: 'arabic',
+    answer: 1
+  },
+  {
+    q: 'Perhatikan kalimat berikut!',
+    arabic: 'ضَرَبَتْهَا',
+    qsuffix: 'Dhomir muttashil lilmaf\'ul pada kalimat di atas adalah…',
+    options: ['هَا', 'تْ', 'بَ', 'رَ', 'ضَ'],
+    optionType: 'arabic',
+    answer: 0
+  },
+  {
+    q: 'Perhatikan kalimat berikut!',
+    arabic: 'رَحَّبُوْاهُمْ',
+    qsuffix: 'Dhomir muttashil lilmaf\'ul pada kalimat di atas adalah…',
+    options: ['رَ', 'حَ', 'بُ', 'وْا', 'هُمْ'],
+    optionType: 'arabic',
+    answer: 4
+  },
+  {
+    q: 'Apakah yang dimaksud dengan fi\'il nahyi?',
+    options: ['Kata perintah', 'Kata larangan', 'Kata ajakan', 'Kata sambung', 'Kata ganti orang'],
+    optionType: 'text',
+    answer: 1
+  },
+  {
+    q: 'Berikut ini contoh fi\'il nahyi adalah…',
+    options: ['لَا تَقْرَأْ', 'قَرَأَ', 'فَتَحَ', 'يَجْلِسُ', 'تَنَامُ'],
+    optionType: 'arabic',
+    answer: 0
+  },
+  {
+    q: 'Perhatikan kalimat berikut!',
+    arabic: 'جَلَسَ التِلْمِيْذُ عَلَى المـَقْعَدِ فِي الفَصْلِ',
+    qsuffix: 'فَاعِلٌ pada kalimat di atas adalah…',
+    options: ['جَلَسَ', 'عَلَى', 'التِلْمِيْذُ', 'المـَقْعَدِ', 'الفَصْلِ'],
+    optionType: 'arabic',
+    answer: 2
+  },
+  {
+    q: 'Fi\'il nahyi pada dasarnya dibentuk dari…',
+    options: ['Fi\'il madhi', 'Fi\'il mudhori\'', 'Dhomirun muttashilun lil faa\'il', 'Dhomirun muttashilun lil maf\'ul', 'Maf\'ulun'],
+    optionType: 'text',
+    answer: 1
+  },
+  {
+    q: 'Berikut ini yang merupakan فِعْلٌ مُضَارِعٌ adalah…',
+    options: ['ضَرَبَ', 'نَصَرَ', 'يَحْسِبُ', 'فَتَحَ', 'نَظَرَ'],
+    optionType: 'arabic',
+    answer: 2
+  },
+  {
+    q: 'Perhatikan kalimat berikut:',
+    arabic: 'فَاطِمَةٌ ... البَابَ',
+    qsuffix: 'Lengkapilah kalimat di atas!',
+    options: ['فَتَحَ', 'فَتَحَتْ', 'نَفْتَحُ', 'يَفْتَحَانِ', 'يَفْتَحُوْنَ'],
+    optionType: 'arabic',
+    answer: 1
+  },
+  {
+    q: 'Perhatikan kalimat berikut:',
+    arabic: '.... كَتَبُوْا الدَّرْسَ',
+    qsuffix: 'Lengkapilah kalimat di atas!',
+    options: ['هُمْ', 'أَنْتَ', 'أَنْتِ', 'هُوَ', 'هِيَ'],
+    optionType: 'arabic',
+    answer: 0
+  },
+  {
+    q: 'Manakah ضَمِيْرٌ مُتَّصِلٌ لِلْمَفْعُوْلِ (dhomir muttashilun lil maf\'ul) pada kalimat berikut?',
+    arabic: 'لَطِيْفَةٌ وَ عُمَرٌ تُسَاعِدُنِي باِلأَمْسِ',
+    options: ['لَطِيْفَةٌ', 'وَ', 'باِلأَمْسِ', 'عُمَرٌ', 'تُسَاعِدُنِي'],
+    optionType: 'arabic',
+    answer: 4
+  },
+  {
+    q: 'ضَمِيْرٌ مُتَّصِلٌ لِلْفَاعِلِ (dhomir muttashilun lil faa\'il) yang tepat untuk kalimat berikut:',
+    arabic: 'مُحَمَّدٌ, عَلِيُّ.... إِلىَ الـمَدْرَسَةِ',
+    options: ['ذَهَبَا', 'ذَهَبُوْا', 'ذَهَبَتَا', 'ذَهَبَ', 'ذَهَبَتْ'],
+    optionType: 'arabic',
+    answer: 0
+  },
+  {
+    q: 'Manakah ضَمِيْرٌ مُتَّصِلٌ لِلْفَاعِلِ (dhomir muttashilun lil faa\'il) pada kalimat berikut?',
+    arabic: 'أَخَذَتْ فَاطِمَةٌ خُبْزاً وَ صَحْنًا',
+    options: ['أَخَذَتْ', 'فَاطِمَةٌ', 'خُبْزاً', 'وَ', 'صَحْنًا'],
+    optionType: 'arabic',
+    answer: 0
+  },
+  {
+    q: 'Apakah yang dimaksud dengan ضَمِيْرٌ مُتَّصِلٌ لِلْفَاعِلِ (dhomir muttashilun lil faa\'il)?',
+    options: [
+      'Kata ganti subjek yang tersambung dengan kata kerja',
+      'Kata ganti subjek yang tersambung dengan kata kerja',
+      'Kata ganti subjek yang terpisah dengan kata kerja',
+      'Kata ganti objek yang terpisah dengan kata kerja',
+      'Kata ganti predikat yang tersambung dengan kata kerja'
+    ],
+    optionType: 'text',
+    answer: 1
+  },
+  {
+    q: 'Apakah yang dimaksud dengan مَفْعُوْلٌ بِهِ?',
+    options: [
+      'Objek yang dibaca nashob',
+      'Subjek yang dibaca nashob',
+      'Kata sifat yang dibaca majrur',
+      'Kata kerja yang dibaca nashob',
+      'Predikat yang dibaca rofa'
+    ],
+    optionType: 'text',
+    answer: 0
+  },
+  {
+    q: 'Ciri dari مَفْعُوْلٌ بِهِ yang benar adalah…',
+    options: [
+      'Isim yang dibaca rofa',
+      'Isim yang dibaca sukun',
+      'Isim yang dibaca majrur',
+      'Isim yang dibaca nashob',
+      'Isim yang dibaca dhomah'
+    ],
+    optionType: 'text',
+    answer: 3
+  },
+  {
+    q: 'Perhatikan kalimat berikut!',
+    arabic: 'رَفَقَ أَبُوْ بَكْرٍ الرَّسُوْلَ فِي الهِجْرَةِ',
+    qsuffix: 'مَفْعُوْلٌ بِهِ dari kalimat berikut adalah…',
+    options: ['الهِجْرَةِ', 'رَفَقَ', 'أَبُوْ بَكْرٍ', 'فِي', 'الرَّسُوْلَ'],
+    optionType: 'arabic',
+    answer: 4
+  },
+  {
+    q: 'Apakah yang dimaksud dengan fi\'il amr?',
+    options: ['Kata perintah', 'Kata larangan', 'Kata ajakan', 'Kata sambung', 'Kata ganti orang'],
+    optionType: 'text',
+    answer: 0
+  },
+  {
+    q: 'Apakah yang dimaksud dengan fi\'il nahyi?',
+    options: ['Kata perintah', 'Kata larangan', 'Kata ajakan', 'Kata sambung', 'Kata ganti orang'],
+    optionType: 'text',
+    answer: 1
+  },
+  {
+    q: 'Berikut ini yang bukan contoh fi\'il amr adalah…',
+    options: ['اِفْتَحْ', 'اجْلِسْ', 'انْزِلْ', 'يَفْتَحُ', 'اكْتُبْ'],
+    optionType: 'arabic',
+    answer: 3
+  },
+  {
+    q: 'Berikut ini contoh fi\'il nahyi adalah…',
+    options: ['لَا تَقْرَأْ', 'قَرَأَ', 'فَتَحَ', 'يَجْلِسُ', 'تَنَامُ'],
+    optionType: 'arabic',
+    answer: 0
+  },
+  {
+    q: 'Fi\'il amr pada dasarnya dibentuk dari…',
+    options: ['Fi\'il madhi', 'Fi\'il mudhori\'', 'Dhomirun muttashilun lil faa\'il', 'Dhomirun muttashilun lil maf\'ul', 'Maf\'ulun'],
+    optionType: 'text',
+    answer: 1
+  }
+];
+
+const labels = ['A','B','C','D','E'];
+const userAnswers = new Array(questions.length).fill(null);
+let submitted = false;
+let currentFilter = 'all';
+
+function renderOptionText(opt, type) {
+  if (type === 'arabic') {
+    return `<span class="arabic-opt">${opt}</span>`;
+  }
+  return opt;
+}
+
+function render() {
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+  questions.forEach((q, i) => {
+    const isAnswered = userAnswers[i] !== null;
+    const isCorrect = submitted && userAnswers[i] === q.answer;
+    const isWrong = submitted && userAnswers[i] !== null && userAnswers[i] !== q.answer;
+    if (currentFilter === 'unanswered' && isAnswered) return;
+    if (currentFilter === 'answered' && !isAnswered) return;
+
+    const card = document.createElement('div');
+    card.className = 'question-card'
+      + (submitted && isCorrect ? ' correct' : '')
+      + (submitted && isWrong ? ' wrong' : '')
+      + (!submitted && isAnswered ? ' answered' : '');
+
+    const numClass = submitted && isCorrect ? 'correct-num' : submitted && isWrong ? 'wrong-num' : '';
+
+    // Build question text
+    let qTextHTML = q.q;
+    if (q.arabic) {
+      qTextHTML += `<span class="arabic">${q.arabic}</span>`;
+    }
+    if (q.qsuffix) {
+      qTextHTML += `<br>${q.qsuffix}`;
+    }
+
+    card.innerHTML = `
+      <div class="q-header">
+        <div class="q-num ${numClass}">${i+1}</div>
+        <div class="q-text">${qTextHTML}</div>
+      </div>
+      <div class="options">
+        ${q.options.map((opt, j) => {
+          let cls = '';
+          if (submitted) {
+            if (j === q.answer) cls = 'correct-ans';
+            else if (userAnswers[i] === j && j !== q.answer) cls = 'wrong-ans';
+          } else if (userAnswers[i] === j) cls = 'selected';
+          return `<button class="option ${cls}" onclick="selectAnswer(${i}, ${j})" ${submitted ? 'disabled' : ''}>
+            <span class="option-label">${labels[j]}</span>
+            <span class="option-text">${renderOptionText(opt, q.optionType)}</span>
+          </button>`;
+        }).join('')}
+      </div>
+      ${submitted ? `<div class="q-result show ${isCorrect ? 'success' : 'danger'}">
+        ${isCorrect
+          ? '✓ Benar'
+          : userAnswers[i] === null
+            ? '— Tidak dijawab. Jawaban benar: ' + labels[q.answer]
+            : '✗ Salah. Jawaban yang benar: ' + labels[q.answer]}
+      </div>` : ''}
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectAnswer(qIndex, optIndex) {
+  if (submitted) return;
+  userAnswers[qIndex] = optIndex;
+  updateStatus();
+  render();
+}
+
+function updateStatus() {
+  const answered = userAnswers.filter(a => a !== null).length;
+  document.getElementById('answered-count').textContent = answered;
+  document.getElementById('total-count').textContent = questions.length;
+  document.getElementById('progress').style.width = Math.round(answered / questions.length * 100) + '%';
+  const btn = document.getElementById('submit-btn');
+  if (submitted) {
+    btn.disabled = true;
+    btn.textContent = 'Selesai';
+    const correct = userAnswers.filter((a, i) => a === questions[i].answer).length;
+    document.getElementById('summary-text').innerHTML =
+      `Nilai akhir: <strong>${correct}/${questions.length}</strong> benar &nbsp;·&nbsp; ${Math.round(correct/questions.length*100)}%`;
+  } else {
+    btn.disabled = answered < questions.length;
+    document.getElementById('summary-text').textContent = answered === questions.length
+      ? 'Semua soal sudah dijawab. Siap dikumpulkan!'
+      : `${questions.length - answered} soal belum dijawab`;
+  }
+}
+
+function submitAll() {
+  if (submitted) return;
+  submitted = true;
+  updateStatus();
+  render();
+}
+
+function filterQuestions(type) {
+  currentFilter = type;
+  document.querySelectorAll('.controls .btn').forEach((b, i) => {
+    b.className = 'btn' + (['all','unanswered','answered'][i] === type ? ' active' : '');
+  });
+  render();
+}
+
+render();
+updateStatus();
+</script>
+</body>
+</html>
