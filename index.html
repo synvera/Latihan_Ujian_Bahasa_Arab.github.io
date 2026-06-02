@@ -118,7 +118,8 @@
     color: #1a1a1a;
     text-align: right;
     direction: rtl;
-    font-family: 'Arabic Typesetting', 'Traditional Arabic', 'Amiri', serif;
+    unicode-bidi: isolate;
+    font-family: 'Noto Naskh Arabic', 'Amiri', 'Arabic Typesetting', 'Traditional Arabic', serif;
   }
 
   .options {
@@ -167,12 +168,13 @@
     flex: 1;
   }
   .option-text .arabic-opt {
-    font-family: 'Arabic Typesetting', 'Traditional Arabic', 'Amiri', serif;
+    font-family: 'Noto Naskh Arabic', 'Amiri', 'Arabic Typesetting', 'Traditional Arabic', serif;
     font-size: 22px;
+    line-height: 1.7;
     direction: rtl;
     text-align: right;
     display: block;
-    line-height: 1.7;
+    unicode-bidi: isolate;
   }
 
   .q-result {
